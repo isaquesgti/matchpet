@@ -47,16 +47,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-secondary': 'var(--gradient-secondary)',
+        'gradient-hero': 'var(--gradient-hero)',
+      },
+      boxShadow: {
+        'soft': 'var(--shadow-soft)',
+        'strong': 'var(--shadow-strong)',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -80,10 +79,25 @@ export default {
             height: "0",
           },
         },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-20px)" },
+        },
+        "swipe-left": {
+          "0%": { transform: "translateX(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateX(-150%) rotate(-30deg)", opacity: "0" },
+        },
+        "swipe-right": {
+          "0%": { transform: "translateX(0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateX(150%) rotate(30deg)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "float": "float 3s ease-in-out infinite",
+        "swipe-left": "swipe-left 0.5s ease-out forwards",
+        "swipe-right": "swipe-right 0.5s ease-out forwards",
       },
     },
   },
