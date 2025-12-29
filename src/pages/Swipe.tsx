@@ -108,6 +108,7 @@ export default function Swipe() {
   // Match notification state
   const [showMatchNotification, setShowMatchNotification] = useState(false);
   const [matchedPetData, setMatchedPetData] = useState<{
+    matchId: string;
     name: string;
     photo?: string;
     species: 'dog' | 'cat';
@@ -273,6 +274,7 @@ export default function Swipe() {
         if (matchCheck) {
           // Show match notification modal
           setMatchedPetData({
+            matchId: matchCheck.id,
             name: currentPet.name,
             photo: currentPet.photos?.[0],
             species: currentPet.species,
@@ -619,6 +621,7 @@ export default function Swipe() {
               <MatchNotification
                 open={showMatchNotification}
                 onClose={() => setShowMatchNotification(false)}
+                matchId={matchedPetData.matchId}
                 matchedPet={matchedPetData}
                 yourPet={{
                   name: userPets.find(p => p.id === selectedPetId)?.name || '',

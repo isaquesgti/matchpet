@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 interface MatchNotificationProps {
   open: boolean;
   onClose: () => void;
+  matchId?: string;
   matchedPet: {
     name: string;
     photo?: string;
@@ -19,7 +20,7 @@ interface MatchNotificationProps {
   };
 }
 
-export function MatchNotification({ open, onClose, matchedPet, yourPet }: MatchNotificationProps) {
+export function MatchNotification({ open, onClose, matchId, matchedPet, yourPet }: MatchNotificationProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,7 +63,11 @@ export function MatchNotification({ open, onClose, matchedPet, yourPet }: MatchN
 
   const handleMessage = () => {
     onClose();
-    navigate('/matches');
+    if (matchId) {
+      navigate(`/chat/${matchId}`);
+    } else {
+      navigate('/matches');
+    }
   };
 
   const handleContinue = () => {
