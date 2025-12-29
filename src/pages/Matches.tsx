@@ -167,11 +167,18 @@ export default function Matches() {
               <Card 
                 key={match.id} 
                 className="border-border/50 bg-card/80 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/chat/${match.id}`)}
               >
                 <CardContent className="p-0">
                   <div className="flex items-center gap-4 p-4">
                     {/* Pet Photo */}
-                    <div className="w-20 h-20 rounded-full overflow-hidden bg-muted flex-shrink-0">
+                    <div 
+                      className="w-20 h-20 rounded-full overflow-hidden bg-muted flex-shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/pets/${match.pet.id}/details`);
+                      }}
+                    >
                       {match.pet.photos && match.pet.photos[0] ? (
                         <img
                           src={match.pet.photos[0]}
@@ -200,7 +207,15 @@ export default function Matches() {
                     </div>
 
                     {/* Action */}
-                    <Button variant="ghost" size="icon" className="flex-shrink-0">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="flex-shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/chat/${match.id}`);
+                      }}
+                    >
                       <MessageCircle className="w-5 h-5 text-primary" />
                     </Button>
                   </div>

@@ -11,6 +11,8 @@ import PetForm from "./pages/PetForm";
 import Swipe from "./pages/Swipe";
 import Matches from "./pages/Matches";
 import Profile from "./pages/Profile";
+import Chat from "./pages/Chat";
+import PetDetails from "./pages/PetDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,8 +30,10 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/pets/new" element={<PetForm />} />
             <Route path="/pets/:id" element={<PetForm />} />
+            <Route path="/pets/:petId/details" element={<PetDetails />} />
             <Route path="/swipe" element={<Swipe />} />
             <Route path="/matches" element={<Matches />} />
+            <Route path="/chat/:matchId" element={<Chat />} />
             <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
