@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   ArrowLeft, Heart, X, MapPin, Info, PawPrint, 
-  Filter, Loader2, RefreshCw, AlertCircle 
+  Filter, Loader2, RefreshCw, AlertCircle, ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -27,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MatchNotification } from '@/components/MatchNotification';
 
 interface Pet {
   id: string;
@@ -102,6 +103,15 @@ export default function Swipe() {
   const [loading, setLoading] = useState(true);
   const [swiping, setSwiping] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  
+  // Match notification state
+  const [showMatchNotification, setShowMatchNotification] = useState(false);
+  const [matchedPetData, setMatchedPetData] = useState<{
+    name: string;
+    photo?: string;
+    species: 'dog' | 'cat';
+  } | null>(null);
   
   // Filters
   const [maxDistance, setMaxDistance] = useState(100);
@@ -261,17 +271,18 @@ export default function Swipe() {
           .maybeSingle();
 
         if (matchCheck) {
-          toast.success(`🎉 Match com ${currentPet.name}!`, {
-            description: 'Vocês podem começar a conversar agora!',
-            action: {
-              label: 'Ver Matches',
-              onClick: () => navigate('/matches'),
-            },
+          // Show match notification modal
+          setMatchedPetData({
+            name: currentPet.name,
+            photo: currentPet.photos?.[0],
+            species: currentPet.species,
           });
+          setShowMatchNotification(true);
         }
       }
 
       setCurrentIndex(prev => prev + 1);
+      setCurrentPhotoIndex(0); // Reset photo index for next pet
     } catch (error: any) {
       console.error('Error swiping:', error);
       toast.error('Erro ao registrar swipe');
@@ -438,12 +449,47 @@ export default function Swipe() {
             {/* Pet Card */}
             <Card className="overflow-hidden border-border/50 bg-card/80 shadow-lg">
               <div className="aspect-[3/4] relative">
-                {currentPet.photos && currentPet.photos[0] ? (
-                  <img
-                    src={currentPet.photos[0]}
-                    alt={currentPet.name}
-                    className="w-full h-full object-cover"
-                  />
+                {currentPet.photos && currentPet.photos.length > 0 ? (
+                  <>
+                    <img
+                      src={currentPet.photos[currentPhotoIndex] || currentPet.photos[0]}
+                      alt={currentPet.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Photo navigation */}
+                    {currentPet.photos.length > 1 && (
+                      <>
+                        <div className="absolute top-2 left-0 right-0 flex justify-center gap-1 px-4">
+                          {currentPet.photos.map((_, idx) => (
+                            <div
+                              key={idx}
+                              className={`h-1 flex-1 rounded-full transition-colors ${
+                                idx === currentPhotoIndex ? 'bg-white' : 'bg-white/40'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white"
+                          onClick={() => setCurrentPhotoIndex(prev => Math.max(0, prev - 1))}
+                          disabled={currentPhotoIndex === 0}
+                        >
+                          <ChevronLeft className="w-6 h-6" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white"
+                          onClick={() => setCurrentPhotoIndex(prev => Math.min(currentPet.photos!.length - 1, prev + 1))}
+                          disabled={currentPhotoIndex === currentPet.photos.length - 1}
+                        >
+                          <ChevronRight className="w-6 h-6" />
+                        </Button>
+                      </>
+                    )}
+                  </>
                 ) : (
                   <div className="w-full h-full bg-muted flex items-center justify-center">
                     <PawPrint className="w-24 h-24 text-muted-foreground/30" />
@@ -567,6 +613,19 @@ export default function Swipe() {
                 </div>
               </DialogContent>
             </Dialog>
+
+            {/* Match Notification */}
+            {matchedPetData && (
+              <MatchNotification
+                open={showMatchNotification}
+                onClose={() => setShowMatchNotification(false)}
+                matchedPet={matchedPetData}
+                yourPet={{
+                  name: userPets.find(p => p.id === selectedPetId)?.name || '',
+                  photo: undefined,
+                }}
+              />
+            )}
           </>
         )}
       </main>

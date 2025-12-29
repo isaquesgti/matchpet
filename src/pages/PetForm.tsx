@@ -8,13 +8,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ArrowLeft, Heart, PawPrint, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PhotoUpload } from '@/components/PhotoUpload';
 
 const petSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório').max(50, 'Nome muito longo'),
@@ -38,6 +38,7 @@ export default function PetForm() {
   
   const [loading, setLoading] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const form = useForm<PetFormData>({
     resolver: zodResolver(petSchema),
@@ -111,11 +112,17 @@ export default function PetForm() {
       breeding_interest: data.breeding_interest || 'not_interested',
       description: data.description || '',
     });
+    setPhotos(data.photos || []);
   };
 
   const onSubmit = async (data: PetFormData) => {
     if (!profileId) {
       toast.error('Perfil não encontrado');
+      return;
+    }
+
+    if (photos.length < 3) {
+      toast.error('Adicione pelo menos 3 fotos do seu pet');
       return;
     }
 
@@ -134,6 +141,7 @@ export default function PetForm() {
             is_neutered: data.is_neutered,
             breeding_interest: data.breeding_interest,
             description: data.description || null,
+            photos: photos,
           })
           .eq('id', id!)
           .eq('owner_id', profileId);
@@ -154,6 +162,7 @@ export default function PetForm() {
             is_neutered: data.is_neutered,
             breeding_interest: data.breeding_interest,
             description: data.description || null,
+            photos: photos,
           });
 
         if (error) throw error;
@@ -365,6 +374,16 @@ export default function PetForm() {
                     </FormItem>
                   )}
                 />
+
+                {/* Fotos */}
+                <div className="space-y-2">
+                  <PhotoUpload
+                    photos={photos}
+                    onPhotosChange={setPhotos}
+                    userId={user?.id || ''}
+                    maxPhotos={6}
+                  />
+                </div>
 
                 {/* Descrição */}
                 <FormField
