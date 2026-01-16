@@ -98,7 +98,11 @@ export default function Swipe() {
   
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userPets, setUserPets] = useState<UserPet[]>([]);
-  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(() => {
+    // Recuperar último pet selecionado do localStorage
+    const saved = localStorage.getItem('lastSelectedPetId');
+    return saved || null;
+  });
   const [pets, setPets] = useState<Pet[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -156,7 +160,16 @@ export default function Swipe() {
         setUserPets(petsData || []);
         
         if (petsData && petsData.length > 0) {
-          setSelectedPetId(petsData[0].id);
+          // Verificar se o pet salvo ainda existe na lista
+          const savedPetId = localStorage.getItem('lastSelectedPetId');
+          const savedPetExists = savedPetId && petsData.some(p => p.id === savedPetId);
+          
+          if (savedPetExists) {
+            setSelectedPetId(savedPetId);
+          } else {
+            setSelectedPetId(petsData[0].id);
+            localStorage.setItem('lastSelectedPetId', petsData[0].id);
+          }
         }
       }
     } catch (error) {
@@ -354,14 +367,26 @@ export default function Swipe() {
           
           <div className="flex items-center gap-2">
             {/* Pet Selector */}
-            <Select value={selectedPetId || ''} onValueChange={setSelectedPetId}>
-              <SelectTrigger className="w-[140px]">
+            <Select 
+              value={selectedPetId || ''} 
+              onValueChange={(id) => {
+                setSelectedPetId(id);
+                localStorage.setItem('lastSelectedPetId', id);
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Selecionar pet" />
               </SelectTrigger>
               <SelectContent>
                 {userPets.map(pet => (
                   <SelectItem key={pet.id} value={pet.id}>
-                    {pet.species === 'dog' ? '🐕' : '🐱'} {pet.name}
+                    <div className="flex items-center gap-2">
+                      <span>{pet.species === 'dog' ? '🐕' : '🐱'}</span>
+                      <span>{pet.name}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {pet.gender === 'male' ? '♂️' : '♀️'}
+                      </span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -434,17 +459,40 @@ export default function Swipe() {
         {!currentPet ? (
           <Card className="border-border/50 bg-card/80">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <Heart className="w-16 h-16 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                Sem mais pets por agora
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Tente ajustar os filtros ou volte mais tarde
-              </p>
-              <Button variant="outline" onClick={fetchPetsToSwipe}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Atualizar
-              </Button>
+              {(() => {
+                const selectedPet = userPets.find(p => p.id === selectedPetId);
+                const searchingSpecies = selectedPet?.species === 'dog' ? 'cadelas' : 'gatas';
+                const searchingGender = selectedPet?.gender === 'male' ? 'fêmeas' : 'machos';
+                
+                return (
+                  <>
+                    <div className="text-6xl mb-4">
+                      {selectedPet?.species === 'dog' ? '🐕' : '🐱'}
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      Sem {searchingSpecies} disponíveis
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Procurando {searchingGender} para <strong>{selectedPet?.name}</strong>
+                    </p>
+                    <div className="bg-muted/50 rounded-lg p-4 mb-6 text-sm text-muted-foreground">
+                      <p className="flex items-center gap-2 mb-2">
+                        <AlertCircle className="w-4 h-4" />
+                        Dicas:
+                      </p>
+                      <ul className="text-left list-disc list-inside space-y-1">
+                        <li>Troque o pet selecionado acima</li>
+                        <li>Aumente a distância máxima nos filtros</li>
+                        <li>Volte mais tarde para novos pets</li>
+                      </ul>
+                    </div>
+                    <Button variant="outline" onClick={fetchPetsToSwipe}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Atualizar
+                    </Button>
+                  </>
+                );
+              })()}
             </CardContent>
           </Card>
         ) : (
