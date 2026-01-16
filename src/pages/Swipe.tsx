@@ -62,6 +62,7 @@ interface UserPet {
   name: string;
   species: 'dog' | 'cat';
   gender: 'male' | 'female';
+  photos: string[] | null;
 }
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -147,7 +148,7 @@ export default function Swipe() {
         // Fetch user's pets
         const { data: petsData, error: petsError } = await supabase
           .from('pets')
-          .select('id, name, species, gender')
+          .select('id, name, species, gender, photos')
           .eq('owner_id', profileData.id)
           .eq('is_active', true);
 
@@ -625,7 +626,7 @@ export default function Swipe() {
                 matchedPet={matchedPetData}
                 yourPet={{
                   name: userPets.find(p => p.id === selectedPetId)?.name || '',
-                  photo: undefined,
+                  photo: userPets.find(p => p.id === selectedPetId)?.photos?.[0],
                 }}
               />
             )}
