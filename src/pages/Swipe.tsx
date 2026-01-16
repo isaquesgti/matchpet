@@ -278,6 +278,9 @@ export default function Swipe() {
       if (error) throw error;
 
       if (liked) {
+        // Wait a moment for the database trigger to create the match
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Check if it's a match
         const { data: matchCheck } = await supabase
           .from('matches')
@@ -286,6 +289,12 @@ export default function Swipe() {
           .maybeSingle();
 
         if (matchCheck) {
+          // Play a sound notification (optional visual feedback)
+          toast.success('🎉 Você deu Match!', {
+            description: `${currentPet.name} também curtiu você!`,
+            duration: 5000,
+          });
+          
           // Show match notification modal
           setMatchedPetData({
             matchId: matchCheck.id,

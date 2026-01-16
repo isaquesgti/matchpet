@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, Plus, LogOut, PawPrint, MessageCircle, Settings } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Plus, LogOut, PawPrint, MessageCircle, Settings, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Profile {
@@ -23,11 +24,20 @@ interface Pet {
   photos: string[];
 }
 
+interface Match {
+  id: string;
+  created_at: string;
+  pet1_id: string;
+  pet2_id: string;
+}
+
 export default function Dashboard() {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [newMatchCount, setNewMatchCount] = useState(0);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
@@ -63,6 +73,29 @@ export default function Dashboard() {
 
         if (petsError) throw petsError;
         setPets(petsData || []);
+
+        // Fetch matches count
+        if (petsData && petsData.length > 0) {
+          const petIds = petsData.map(p => p.id);
+          const { data: matchesData } = await supabase
+            .from('matches')
+            .select('*')
+            .or(`pet1_id.in.(${petIds.join(',')}),pet2_id.in.(${petIds.join(',')})`)
+            .order('created_at', { ascending: false });
+
+          setMatches(matchesData || []);
+          
+          // Check for new matches (within last 24 hours)
+          const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+          const lastSeenMatches = localStorage.getItem('lastSeenMatchesTime');
+          const newMatches = (matchesData || []).filter(m => {
+            if (lastSeenMatches) {
+              return m.created_at > lastSeenMatches;
+            }
+            return m.created_at > oneDayAgo;
+          });
+          setNewMatchCount(newMatches.length);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -70,6 +103,12 @@ export default function Dashboard() {
     } finally {
       setLoadingData(false);
     }
+  };
+
+  const handleViewMatches = () => {
+    localStorage.setItem('lastSeenMatchesTime', new Date().toISOString());
+    setNewMatchCount(0);
+    navigate('/matches');
   };
 
   const handleSignOut = async () => {
@@ -130,12 +169,22 @@ export default function Dashboard() {
             </CardContent>
           </Card>
           
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow border-border/50 bg-card/80" onClick={() => navigate('/matches')}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow border-border/50 bg-card/80 relative" onClick={handleViewMatches}>
             <CardContent className="flex flex-col items-center justify-center p-6">
-              <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mb-3">
+              <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mb-3 relative">
                 <MessageCircle className="w-6 h-6 text-accent" />
+                {newMatchCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-destructive animate-pulse">
+                    {newMatchCount}
+                  </Badge>
+                )}
               </div>
               <span className="font-medium text-foreground">Mensagens</span>
+              {newMatchCount > 0 && (
+                <span className="text-xs text-primary mt-1 font-medium">
+                  {newMatchCount} novo{newMatchCount > 1 ? 's' : ''} match{newMatchCount > 1 ? 'es' : ''}!
+                </span>
+              )}
             </CardContent>
           </Card>
           
