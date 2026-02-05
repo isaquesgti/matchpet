@@ -77,6 +77,16 @@ export function PhotoUpload({ photos, onPhotosChange, userId, maxPhotos = 6 }: P
       const pathMatch = url.pathname.match(/\/pet-photos\/(.+)$/);
       if (pathMatch) {
         const filePath = decodeURIComponent(pathMatch[1]);
+        
+        // Validate that the path belongs to this user before attempting deletion
+        if (!filePath.startsWith(`${userId}/`)) {
+          toast.error('Não é possível remover fotos de outro usuário');
+          // Still remove from local state as it shouldn't be there
+          const newPhotos = photos.filter((_, i) => i !== index);
+          onPhotosChange(newPhotos);
+          return;
+        }
+        
         await supabase.storage.from('pet-photos').remove([filePath]);
       }
 

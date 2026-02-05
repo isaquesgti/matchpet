@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,13 @@ import { Card } from '@/components/ui/card';
 import { ArrowLeft, Send, PawPrint } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+// Message validation schema
+const messageSchema = z.string()
+  .min(1, 'Mensagem não pode estar vazia')
+  .max(5000, 'Mensagem muito longa (máx 5000 caracteres)');
+
+const MAX_MESSAGE_LENGTH = 5000;
 
 interface Message {
   id: string;
@@ -39,6 +47,7 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [lastMessageTime, setLastMessageTime] = useState(0);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [matchInfo, setMatchInfo] = useState<MatchInfo | null>(null);
   
@@ -179,16 +188,33 @@ export default function Chat() {
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newMessage.trim() || !profileId || !matchId) return;
+    const trimmedMessage = newMessage.trim();
+    if (!trimmedMessage || !profileId || !matchId) return;
+    
+    // Validate message content
+    const validationResult = messageSchema.safeParse(trimmedMessage);
+    if (!validationResult.success) {
+      toast.error(validationResult.error.errors[0].message);
+      return;
+    }
+    
+    // Rate limiting - 1 second cooldown between messages
+    const now = Date.now();
+    if (now - lastMessageTime < 1000) {
+      toast.error('Aguarde antes de enviar outra mensagem');
+      return;
+    }
     
     setSending(true);
+    setLastMessageTime(now);
+    
     try {
       const { error } = await supabase
         .from('messages')
         .insert({
           match_id: matchId,
           sender_id: profileId,
-          content: newMessage.trim(),
+          content: trimmedMessage,
         });
 
       if (error) throw error;
@@ -342,10 +368,11 @@ export default function Chat() {
             <Input
               ref={inputRef}
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => setNewMessage(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
               placeholder="Digite uma mensagem..."
               className="flex-1"
               disabled={sending}
+              maxLength={MAX_MESSAGE_LENGTH}
             />
             <Button type="submit" disabled={!newMessage.trim() || sending}>
               <Send className="w-5 h-5" />
