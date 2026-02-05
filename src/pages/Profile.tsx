@@ -96,12 +96,19 @@ export default function Profile() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        
+        // Reduce coordinate precision for privacy (~1km accuracy)
+        // This prevents exposing exact user location to third-party services
+        const roundedLat = Math.round(latitude * 100) / 100;
+        const roundedLon = Math.round(longitude * 100) / 100;
+        
         setCoordinates({ lat: latitude, lng: longitude });
         
         // Try to get city/state from coordinates using reverse geocoding
+        // Using reduced precision coordinates for privacy
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=pt`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${roundedLat}&lon=${roundedLon}&accept-language=pt`
           );
           const data = await response.json();
           
