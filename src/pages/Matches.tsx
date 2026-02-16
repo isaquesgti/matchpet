@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Heart, MessageCircle, PawPrint } from 'lucide-react';
 import { toast } from 'sonner';
+import AdBanner from '@/components/AdBanner';
 
 interface Match {
   id: string;
@@ -224,6 +225,8 @@ export default function Matches() {
             ))}
           </div>
         )}
+
+        <AdBanner slot="matches-bottom" size="slim" className="mt-8" />
       </main>
     </div>
   );

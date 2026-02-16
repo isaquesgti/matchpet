@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Heart, Plus, LogOut, PawPrint, MessageCircle, Settings, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import AdBanner from '@/components/AdBanner';
 
 interface Profile {
   id: string;
@@ -197,6 +198,8 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <AdBanner slot="dashboard-top" size="leaderboard" className="mb-8" />
 
         {/* My Pets */}
         <Card className="border-border/50 bg-card/80">
