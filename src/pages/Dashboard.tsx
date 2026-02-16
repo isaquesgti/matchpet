@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Plus, LogOut, PawPrint, MessageCircle, Settings, Bell } from 'lucide-react';
+import { Heart, Plus, LogOut, PawPrint, MessageCircle, Settings, Bell, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import AdBanner from '@/components/AdBanner';
+import { useAdmin } from '@/hooks/useAdmin';
 
 interface Profile {
   id: string;
@@ -34,6 +35,7 @@ interface Match {
 
 export default function Dashboard() {
   const { user, loading, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
@@ -197,6 +199,17 @@ export default function Dashboard() {
               <span className="font-medium text-foreground">Configurações</span>
             </CardContent>
           </Card>
+
+          {isAdmin && (
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow border-primary/30 bg-card/80" onClick={() => navigate('/admin')}>
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <Shield className="w-6 h-6 text-primary" />
+                </div>
+                <span className="font-medium text-foreground">Admin</span>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <AdBanner slot="dashboard-top" size="leaderboard" className="mb-8" />

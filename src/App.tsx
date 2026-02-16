@@ -13,6 +13,7 @@ import Matches from "./pages/Matches";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 import PetDetails from "./pages/PetDetails";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/matches" element={<Matches />} />
             <Route path="/chat/:matchId" element={<Chat />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
