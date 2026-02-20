@@ -13,22 +13,12 @@ interface BannerData {
 interface AdBannerProps {
   slot: string;
   className?: string;
-  size?: "leaderboard" | "medium" | "slim";
   rotationInterval?: number;
 }
 
-const sizeMap = {
-  // Mantemos as proporções de aspecto para o container, mas a imagem lá dentro será livre
-  leaderboard: "w-full max-w-5xl aspect-[3/1] md:aspect-[8/1]",
-  medium: "w-full max-w-2xl aspect-[16/9] md:aspect-[21/9]",
-  slim: "w-full max-w-6xl aspect-[5/1] md:aspect-[12/1]",
-};
-
-export default function AdBanner({ slot, className, size = "leaderboard", rotationInterval = 6000 }: AdBannerProps) {
+export default function AdBanner({ slot, className, rotationInterval = 6000 }: AdBannerProps) {
   const [banners, setBanners] = useState<BannerData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const impressionLogged = useRef<Set<string>>(new Set());
-  const clickLogged = useRef<Set<string>>(new Set());
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
@@ -62,56 +52,58 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
   };
 
   return (
-    <div className={cn("w-full flex justify-center px-2 my-4", className)}>
-      <div className={cn(
-        "relative rounded-lg overflow-hidden group border bg-white flex items-center justify-center", 
-        sizeMap[size]
-      )}>
-        {/* Container da Imagem */}
+    <div className={cn("w-full flex justify-center my-4", className)}>
+      {/* Container Principal: 
+          - No PC: max-w-screen-xl (para não ficar infinitamente largo)
+          - No celular: w-full
+      */}
+      <div className="relative w-full max-w-[1400px] overflow-hidden group">
+        
+        {/* Container da Imagem com proporção flexível */}
         <div
-          className="w-full h-full cursor-pointer flex items-center justify-center p-1"
+          className="w-full cursor-pointer flex items-center justify-center"
           onClick={handleClick}
         >
           <img
             key={current.id}
             src={current.image_url}
             alt={current.title || 'Publicidade'}
-            // object-contain garante que a imagem caiba inteira sem esticar nem cortar
-            className="max-w-full max-h-full object-contain transition-opacity duration-500"
+            /* ESTILO DO EXEMPLO:
+               - w-full h-auto: faz a imagem ocupar toda a largura e a altura seguir o desenho da foto.
+               - object-fill: garante que preencha o espaço (como no código que você mandou).
+            */
+            className="w-full h-auto object-fill block transition-opacity duration-500 rounded-lg md:rounded-xl"
           />
         </div>
 
-        {/* Setas de Navegação */}
+        {/* Setas de Navegação (Estilo flutuante do exemplo) */}
         {banners.length > 1 && (
           <>
             <button 
               onClick={(e) => { e.stopPropagation(); goTo(-1); }} 
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-              aria-label="Anterior"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
+              <ChevronLeft className="w-6 h-6 text-gray-800" />
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); goTo(1); }} 
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-              aria-label="Próximo"
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
             >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
+              <ChevronRight className="w-6 h-6 text-gray-800" />
             </button>
 
-            {/* Pontinhos (Dots) Indicadores */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {/* Dots (Indicadores) */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               {banners.map((_, i) => (
                 <button
                   key={i}
                   onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
                   className={cn(
-                    "h-1.5 rounded-full transition-all duration-300",
+                    "h-2 rounded-full transition-all duration-300 shadow-sm",
                     i === currentIndex 
-                      ? "bg-primary w-5" // Dot ativo colorido e mais largo
-                      : "bg-gray-300 w-1.5 hover:bg-gray-400"
+                      ? "bg-white w-8" 
+                      : "bg-white/50 w-2 hover:bg-white/80"
                   )}
-                  aria-label={`Ir para banner ${i + 1}`}
                 />
               ))}
             </div>
