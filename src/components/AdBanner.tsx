@@ -27,6 +27,7 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
   const [banners, setBanners] = useState<BannerData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const impressionLogged = useRef<Set<string>>(new Set());
+  const clickLogged = useRef<Set<string>>(new Set());
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
@@ -50,8 +51,10 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
     supabase.from('banner_events').insert({ banner_id: banner.id, event_type: 'impression' }).then();
   }, []);
 
-  // Log click
+  // Log click (deduplicated per session)
   const logClick = useCallback((banner: BannerData) => {
+    if (clickLogged.current.has(banner.id)) return;
+    clickLogged.current.add(banner.id);
     supabase.from('banner_events').insert({ banner_id: banner.id, event_type: 'click' }).then();
   }, []);
 
