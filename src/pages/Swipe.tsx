@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,6 +91,129 @@ function calculateAge(birthDate: string | null): string {
     return months === 1 ? '1 mês' : `${months} meses`;
   }
   return 'Filhote';
+}
+
+function SwipeableCard({ 
+  currentPet, currentPhotoIndex, setCurrentPhotoIndex, 
+  onSwipeLeft, onSwipeRight, onShowDetails, swiping 
+}: { 
+  currentPet: Pet; currentPhotoIndex: number; 
+  setCurrentPhotoIndex: React.Dispatch<React.SetStateAction<number>>;
+  onSwipeLeft: () => void; onSwipeRight: () => void; 
+  onShowDetails: () => void; swiping: boolean;
+}) {
+  const { handlers, style, offsetX } = useSwipeGesture({
+    onSwipeLeft,
+    onSwipeRight,
+    threshold: 80,
+  });
+
+  return (
+    <Card className="overflow-hidden border-border/50 bg-card/80 shadow-lg" style={style} {...handlers}>
+      {/* Swipe indicators */}
+      {offsetX > 40 && (
+        <div className="absolute top-8 left-8 z-20 border-4 border-primary text-primary font-bold text-2xl px-4 py-1 rounded-lg rotate-[-15deg]">
+          LIKE ❤️
+        </div>
+      )}
+      {offsetX < -40 && (
+        <div className="absolute top-8 right-8 z-20 border-4 border-destructive text-destructive font-bold text-2xl px-4 py-1 rounded-lg rotate-[15deg]">
+          NOPE ✕
+        </div>
+      )}
+
+      <div className="aspect-[3/4] relative">
+        {currentPet.photos && currentPet.photos.length > 0 ? (
+          <>
+            <img
+              src={currentPet.photos[currentPhotoIndex] || currentPet.photos[0]}
+              alt={currentPet.name}
+              className="w-full h-full object-cover pointer-events-none"
+              draggable={false}
+            />
+            {currentPet.photos.length > 1 && (
+              <>
+                <div className="absolute top-2 left-0 right-0 flex justify-center gap-1 px-4">
+                  {currentPet.photos.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`h-1 flex-1 rounded-full transition-colors ${
+                        idx === currentPhotoIndex ? 'bg-white' : 'bg-white/40'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white"
+                  onClick={(e) => { e.stopPropagation(); setCurrentPhotoIndex(prev => Math.max(0, prev - 1)); }}
+                  disabled={currentPhotoIndex === 0}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white"
+                  onClick={(e) => { e.stopPropagation(); setCurrentPhotoIndex(prev => Math.min(currentPet.photos!.length - 1, prev + 1)); }}
+                  disabled={currentPhotoIndex === currentPet.photos.length - 1}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </Button>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="w-full h-full bg-muted flex items-center justify-center">
+            <PawPrint className="w-24 h-24 text-muted-foreground/30" />
+          </div>
+        )}
+        
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                {currentPet.name}
+                <span className="text-lg font-normal text-white/80">
+                  {calculateAge(currentPet.birth_date)}
+                </span>
+              </h2>
+              <p className="text-white/80 flex items-center gap-1">
+                {currentPet.species === 'dog' ? '🐕' : '🐱'} 
+                {currentPet.breed || 'Sem raça definida'}
+                <span className="mx-1">•</span>
+                {currentPet.gender === 'male' ? '♂️' : '♀️'}
+              </p>
+              {currentPet.owner?.city && (
+                <p className="text-white/60 text-sm flex items-center gap-1 mt-1">
+                  <MapPin className="w-3 h-3" />
+                  {currentPet.owner.city}, {currentPet.owner.state}
+                </p>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20"
+              onClick={(e) => { e.stopPropagation(); onShowDetails(); }}
+            >
+              <Info className="w-6 h-6" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="absolute top-4 left-4 flex gap-2">
+          {currentPet.breeding_interest === 'looking_for_mate' && (
+            <Badge className="bg-primary/90">Procurando parceiro</Badge>
+          )}
+          {currentPet.breeding_interest === 'available_for_breeding' && (
+            <Badge className="bg-secondary/90">Disponível</Badge>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 export default function Swipe() {
@@ -507,100 +631,15 @@ export default function Swipe() {
         ) : (
           <>
             {/* Pet Card */}
-            <Card className="overflow-hidden border-border/50 bg-card/80 shadow-lg">
-              <div className="aspect-[3/4] relative">
-                {currentPet.photos && currentPet.photos.length > 0 ? (
-                  <>
-                    <img
-                      src={currentPet.photos[currentPhotoIndex] || currentPet.photos[0]}
-                      alt={currentPet.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Photo navigation */}
-                    {currentPet.photos.length > 1 && (
-                      <>
-                        <div className="absolute top-2 left-0 right-0 flex justify-center gap-1 px-4">
-                          {currentPet.photos.map((_, idx) => (
-                            <div
-                              key={idx}
-                              className={`h-1 flex-1 rounded-full transition-colors ${
-                                idx === currentPhotoIndex ? 'bg-white' : 'bg-white/40'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white"
-                          onClick={() => setCurrentPhotoIndex(prev => Math.max(0, prev - 1))}
-                          disabled={currentPhotoIndex === 0}
-                        >
-                          <ChevronLeft className="w-6 h-6" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white"
-                          onClick={() => setCurrentPhotoIndex(prev => Math.min(currentPet.photos!.length - 1, prev + 1))}
-                          disabled={currentPhotoIndex === currentPet.photos.length - 1}
-                        >
-                          <ChevronRight className="w-6 h-6" />
-                        </Button>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
-                    <PawPrint className="w-24 h-24 text-muted-foreground/30" />
-                  </div>
-                )}
-                
-                {/* Overlay Info */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        {currentPet.name}
-                        <span className="text-lg font-normal text-white/80">
-                          {calculateAge(currentPet.birth_date)}
-                        </span>
-                      </h2>
-                      <p className="text-white/80 flex items-center gap-1">
-                        {currentPet.species === 'dog' ? '🐕' : '🐱'} 
-                        {currentPet.breed || 'Sem raça definida'}
-                        <span className="mx-1">•</span>
-                        {currentPet.gender === 'male' ? '♂️' : '♀️'}
-                      </p>
-                      {currentPet.owner?.city && (
-                        <p className="text-white/60 text-sm flex items-center gap-1 mt-1">
-                          <MapPin className="w-3 h-3" />
-                          {currentPet.owner.city}, {currentPet.owner.state}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white hover:bg-white/20"
-                      onClick={() => setShowDetails(true)}
-                    >
-                      <Info className="w-6 h-6" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Badges */}
-                <div className="absolute top-4 left-4 flex gap-2">
-                  {currentPet.breeding_interest === 'looking_for_mate' && (
-                    <Badge className="bg-primary/90">Procurando parceiro</Badge>
-                  )}
-                  {currentPet.breeding_interest === 'available_for_breeding' && (
-                    <Badge className="bg-secondary/90">Disponível</Badge>
-                  )}
-                </div>
-              </div>
-            </Card>
+            <SwipeableCard
+              currentPet={currentPet}
+              currentPhotoIndex={currentPhotoIndex}
+              setCurrentPhotoIndex={setCurrentPhotoIndex}
+              onSwipeLeft={() => handleSwipe(false)}
+              onSwipeRight={() => handleSwipe(true)}
+              onShowDetails={() => setShowDetails(true)}
+              swiping={swiping}
+            />
 
             {/* Action Buttons */}
             <div className="flex items-center justify-center gap-6 mt-6">
