@@ -14,13 +14,14 @@ interface AdBannerProps {
   slot: string;
   className?: string;
   size?: "leaderboard" | "medium" | "slim";
-  rotationInterval?: number; // ms between slides, default 6000
+  rotationInterval?: number; // ms entre slides, padrão 6000
 }
 
 const sizeMap = {
-  leaderboard: "w-full max-w-4xl h-[90px] md:h-[100px]",
-  medium: "w-full max-w-2xl h-[200px] md:h-[250px]",
-  slim: "w-full max-w-5xl h-[60px] md:h-[70px]",
+  // No mobile (4/1) fica mais alto para leitura, no PC (8/1) fica horizontal padrão
+  leaderboard: "w-full max-w-5xl aspect-[4/1] md:aspect-[8/1]",
+  medium: "w-full max-w-2xl aspect-[16/9] md:aspect-[21/9]",
+  slim: "w-full max-w-6xl aspect-[6/1] md:aspect-[12/1]",
 };
 
 export default function AdBanner({ slot, className, size = "leaderboard", rotationInterval = 6000 }: AdBannerProps) {
@@ -30,6 +31,7 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
   const clickLogged = useRef<Set<string>>(new Set());
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
+  // Busca de banners no banco
   useEffect(() => {
     const fetchBanners = async () => {
       const { data } = await supabase
@@ -44,30 +46,35 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
     fetchBanners();
   }, [slot]);
 
-  // Log impression when a banner becomes visible
+  // Log de visualização (Impression)
   const logImpression = useCallback((banner: BannerData) => {
     if (impressionLogged.current.has(banner.id)) return;
     impressionLogged.current.add(banner.id);
     supabase.from('banner_events').insert({ banner_id: banner.id, event_type: 'impression' }).then();
   }, []);
 
-  // Log click (deduplicated per session)
+  // Log de clique
   const logClick = useCallback((banner: BannerData) => {
     if (clickLogged.current.has(banner.id)) return;
     clickLogged.current.add(banner.id);
     supabase.from('banner_events').insert({ banner_id: banner.id, event_type: 'click' }).then();
   }, []);
 
-  // Auto-rotation
+  // Função para navegar entre banners
+  const goTo = useCallback((dir: -1 | 1) => {
+    setCurrentIndex(prev => (prev + dir + banners.length) % banners.length);
+  }, [banners.length]);
+
+  // Rotação automática
   useEffect(() => {
     if (banners.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % banners.length);
+      goTo(1);
     }, rotationInterval);
     return () => clearInterval(timerRef.current);
-  }, [banners.length, rotationInterval]);
+  }, [banners.length, rotationInterval, goTo]);
 
-  // Log impression when current banner changes
+  // Loga a impressão sempre que o banner mudar
   useEffect(() => {
     if (banners[currentIndex]) {
       logImpression(banners[currentIndex]);
@@ -78,17 +85,6 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
 
   const current = banners[currentIndex];
 
-  const goTo = (dir: -1 | 1) => {
-    setCurrentIndex(prev => (prev + dir + banners.length) % banners.length);
-    // Reset timer on manual nav
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = setInterval(() => {
-        setCurrentIndex(prev => (prev + 1) % banners.length);
-      }, rotationInterval);
-    }
-  };
-
   const handleClick = () => {
     logClick(current);
     if (current.link_url) {
@@ -97,52 +93,58 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
   };
 
   return (
-    <div className={cn("mx-auto px-4", className)}>
-      <div className={cn("relative rounded-xl overflow-hidden group", sizeMap[size])}>
-        {/* Banner image */}
+    <div className={cn("w-full flex justify-center px-2 my-4", className)}>
+      <div className={cn(
+        "relative rounded-lg overflow-hidden group shadow-sm border bg-muted", 
+        sizeMap[size]
+      )}>
+        {/* Imagem do Banner */}
         <div
-          className="w-full h-full cursor-pointer transition-opacity duration-500"
+          className="w-full h-full cursor-pointer relative"
           onClick={handleClick}
           role="link"
           tabIndex={0}
           onKeyDown={e => e.key === 'Enter' && handleClick()}
         >
           <img
+            key={current.id} // Key força o navegador a tratar como nova imagem para animações
             src={current.image_url}
             alt={current.title || 'Publicidade'}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
           />
         </div>
 
-        {/* Navigation arrows (only if multiple banners) */}
+        {/* Setas de Navegação (Apenas se houver + de 1) */}
         {banners.length > 1 && (
           <>
             <button
               onClick={(e) => { e.stopPropagation(); goTo(-1); }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label="Banner anterior"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Anterior"
             >
-              <ChevronLeft className="w-4 h-4 text-foreground" />
+              <ChevronLeft className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); goTo(1); }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label="Próximo banner"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Próximo"
             >
-              <ChevronRight className="w-4 h-4 text-foreground" />
+              <ChevronRight className="w-5 h-5 text-white" />
             </button>
 
-            {/* Dots indicator */}
-            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {/* Indicadores (Dots) Clicáveis */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
               {banners.map((_, i) => (
                 <button
                   key={i}
                   onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
                   className={cn(
-                    "w-1.5 h-1.5 rounded-full transition-all",
-                    i === currentIndex ? "bg-primary w-3" : "bg-background/60"
+                    "h-1.5 rounded-full transition-all duration-300",
+                    i === currentIndex 
+                      ? "bg-white w-6" // Dot ativo mais longo
+                      : "bg-white/40 w-2 hover:bg-white/60"
                   )}
-                  aria-label={`Banner ${i + 1}`}
+                  aria-label={`Ir para o banner ${i + 1}`}
                 />
               ))}
             </div>
