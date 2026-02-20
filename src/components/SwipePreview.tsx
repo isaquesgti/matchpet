@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import demoPet1 from "@/assets/demo-pet-1.jpg";
 import demoPet2 from "@/assets/demo-pet-2.jpg";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 
 const SwipePreview = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -33,6 +34,12 @@ const SwipePreview = () => {
     setCurrentIndex((prev) => (prev + 1) % pets.length);
   };
 
+  const { handlers, style, offsetX } = useSwipeGesture({
+    onSwipeLeft: () => handleSwipe("left"),
+    onSwipeRight: () => handleSwipe("right"),
+    threshold: 80,
+  });
+
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4">
@@ -46,12 +53,25 @@ const SwipePreview = () => {
         </div>
 
         <div className="max-w-md mx-auto">
-          <Card className="relative overflow-hidden shadow-strong">
+          <Card className="relative overflow-hidden shadow-strong" style={style} {...handlers}>
+            {/* Swipe indicators */}
+            {offsetX > 40 && (
+              <div className="absolute top-8 left-8 z-20 border-4 border-green-500 text-green-500 font-bold text-2xl px-4 py-1 rounded-lg rotate-[-15deg]">
+                LIKE ❤️
+              </div>
+            )}
+            {offsetX < -40 && (
+              <div className="absolute top-8 right-8 z-20 border-4 border-destructive text-destructive font-bold text-2xl px-4 py-1 rounded-lg rotate-[15deg]">
+                NOPE ✕
+              </div>
+            )}
+
             <div className="aspect-[3/4] relative">
               <img 
                 src={currentPet.image} 
                 alt={`${currentPet.name} - ${currentPet.breed}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover pointer-events-none"
+                draggable={false}
               />
               
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -92,7 +112,7 @@ const SwipePreview = () => {
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Deslize para a esquerda para passar, direita para dar like!
+            Deslize o card para a esquerda ou direita, ou use os botões!
           </p>
         </div>
       </div>
