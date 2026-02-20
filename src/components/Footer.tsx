@@ -8,7 +8,7 @@ const Footer = () => {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <Heart className="w-8 h-8 text-primary" />
-              <span className="text-2xl font-bold text-foreground">PetMatchMate</span>
+              <span className="text-2xl font-bold text-foreground">LovixPet</span>
             </div>
             <p className="text-muted-foreground max-w-md">
               Conectando pets para cruzamentos responsáveis e seguros. 
@@ -36,7 +36,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-border pt-8 text-center text-muted-foreground">
-          <p>&copy; 2025 PetMatchMate. Todos os direitos reservados. Feito com <Heart className="inline w-4 h-4 text-primary" /> para pets.</p>
+          <p>&copy; 2025 LovixPet. Todos os direitos reservados. Feito com <Heart className="inline w-4 h-4 text-primary" /> para pets.</p>
         </div>
       </div>
     </footer>
