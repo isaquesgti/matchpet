@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      banner_events: {
+        Row: {
+          banner_id: string
+          created_at: string
+          event_type: string
+          id: string
+        }
+        Insert: {
+          banner_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+        }
+        Update: {
+          banner_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "banner_events_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "banner_stats"
+            referencedColumns: ["banner_id"]
+          },
+          {
+            foreignKeyName: "banner_events_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "banners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banners: {
         Row: {
           created_at: string
@@ -300,7 +336,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      banner_stats: {
+        Row: {
+          banner_id: string | null
+          clicks: number | null
+          ctr: number | null
+          image_url: string | null
+          impressions: number | null
+          is_active: boolean | null
+          slot: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
