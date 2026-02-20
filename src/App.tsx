@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"; // Adicionado useLocation
 import { AuthProvider } from "@/hooks/useAuth";
+import { useEffect } from "react"; // Adicionado useEffect
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -15,8 +16,19 @@ import Chat from "./pages/Chat";
 import PetDetails from "./pages/PetDetails";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import TermsPage from "./components/Terms"; // Importando Termos
+import PrivacyPage from "./components/Privacy"; // Importando Privacidade
 
 const queryClient = new QueryClient();
+
+// Componente para rolar a página para o topo automaticamente ao navegar
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,6 +37,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop /> {/* Adicionado aqui */}
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -37,7 +50,11 @@ const App = () => (
             <Route path="/chat/:matchId" element={<Chat />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Novas Rotas Legais */}
+            <Route path="/termos" element={<TermsPage />} />
+            <Route path="/privacidade" element={<PrivacyPage />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
