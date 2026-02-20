@@ -16,7 +16,7 @@ import PetDetails from "./pages/PetDetails";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import TermsPage from "./components/Terms"; // Importando Termos
-import PrivacyPage from "./components/Privacy"; // Importando Privacidade
+import Privacy from "./components/Privacy"; // Importando Privacidade
 
 const queryClient = new QueryClient();
 const App = () => (
