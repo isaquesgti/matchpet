@@ -101,7 +101,7 @@ export default function Auth() {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-foreground">
-              {isLogin ? 'Entrar no PetMatchMate' : 'Criar Conta'}
+              {isLogin ? 'Entrar no LovixPet' : 'Criar Conta'}
             </CardTitle>
             <CardDescription className="text-muted-foreground">
               {isLogin
