@@ -8,8 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Heart, Plus, Trash2, Upload, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Heart, Plus, Trash2, Upload, ExternalLink, Eye, MousePointerClick, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 interface Banner {
   id: string;
@@ -19,6 +20,13 @@ interface Banner {
   link_url: string;
   is_active: boolean;
   display_order: number;
+}
+
+interface BannerStat {
+  banner_id: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
 }
 
 const SLOT_OPTIONS = [
@@ -33,6 +41,7 @@ export default function Admin() {
   const { isAdmin, loading: adminLoading } = useAdmin();
   const navigate = useNavigate();
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [stats, setStats] = useState<Record<string, BannerStat>>({});
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
@@ -54,16 +63,23 @@ export default function Admin() {
   }, [isAdmin]);
 
   const fetchBanners = async () => {
-    const { data, error } = await supabase
-      .from('banners')
-      .select('*')
-      .order('slot')
-      .order('display_order');
+    const [bannersRes, statsRes] = await Promise.all([
+      supabase.from('banners').select('*').order('slot').order('display_order'),
+      supabase.from('banner_stats').select('*'),
+    ]);
 
-    if (error) {
+    if (bannersRes.error) {
       toast.error('Erro ao carregar banners');
     } else {
-      setBanners(data || []);
+      setBanners(bannersRes.data || []);
+    }
+
+    if (statsRes.data) {
+      const statsMap: Record<string, BannerStat> = {};
+      for (const s of statsRes.data) {
+        statsMap[s.banner_id] = s as BannerStat;
+      }
+      setStats(statsMap);
     }
     setLoading(false);
   };
@@ -233,40 +249,58 @@ export default function Admin() {
               <p className="text-muted-foreground text-center py-8">Nenhum banner cadastrado ainda.</p>
             ) : (
               <div className="space-y-4">
-                {banners.map(banner => (
-                  <div
-                    key={banner.id}
-                    className="flex items-center gap-4 p-3 rounded-lg border border-border/50 bg-background/50"
-                  >
-                    <img
-                      src={banner.image_url}
-                      alt={banner.title || 'Banner'}
-                      className="w-24 h-14 object-cover rounded-md flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground text-sm truncate">
-                        {banner.title || '(sem título)'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {SLOT_OPTIONS.find(s => s.value === banner.slot)?.label || banner.slot}
-                      </p>
-                      {banner.link_url && (
-                        <a href={banner.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 mt-0.5">
-                          <ExternalLink className="w-3 h-3" /> Link
-                        </a>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{banner.is_active ? 'Ativo' : 'Inativo'}</span>
-                        <Switch checked={banner.is_active} onCheckedChange={() => toggleActive(banner)} />
+                {banners.map(banner => {
+                  const stat = stats[banner.id];
+                  return (
+                    <div
+                      key={banner.id}
+                      className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border border-border/50 bg-background/50"
+                    >
+                      <img
+                        src={banner.image_url}
+                        alt={banner.title || 'Banner'}
+                        className="w-24 h-14 object-cover rounded-md flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm truncate">
+                          {banner.title || '(sem título)'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {SLOT_OPTIONS.find(s => s.value === banner.slot)?.label || banner.slot}
+                        </p>
+                        {banner.link_url && (
+                          <a href={banner.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 mt-0.5">
+                            <ExternalLink className="w-3 h-3" /> Link
+                          </a>
+                        )}
+                        {/* Metrics */}
+                        <div className="flex items-center gap-3 mt-2">
+                          <Badge variant="secondary" className="text-xs gap-1 font-normal">
+                            <Eye className="w-3 h-3" />
+                            {stat?.impressions ?? 0}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs gap-1 font-normal">
+                            <MousePointerClick className="w-3 h-3" />
+                            {stat?.clicks ?? 0}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs gap-1 font-normal">
+                            <BarChart3 className="w-3 h-3" />
+                            CTR {stat?.ctr ?? 0}%
+                          </Badge>
+                        </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteBanner(banner)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">{banner.is_active ? 'Ativo' : 'Inativo'}</span>
+                          <Switch checked={banner.is_active} onCheckedChange={() => toggleActive(banner)} />
+                        </div>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteBanner(banner)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
