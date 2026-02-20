@@ -13,10 +13,18 @@ interface BannerData {
 interface AdBannerProps {
   slot: string;
   className?: string;
+  size?: "leaderboard" | "medium" | "slim";
   rotationInterval?: number;
 }
 
-export default function AdBanner({ slot, className, rotationInterval = 6000 }: AdBannerProps) {
+const sizeMap = {
+  // Voltamos com proporções fixas para o container não ficar gigante
+  leaderboard: "w-full max-w-5xl aspect-[3/1] md:aspect-[6/1]", 
+  medium: "w-full max-w-2xl aspect-[16/9] md:aspect-[21/9]",
+  slim: "w-full max-w-6xl aspect-[5/1] md:aspect-[12/1]",
+};
+
+export default function AdBanner({ slot, className, size = "leaderboard", rotationInterval = 6000 }: AdBannerProps) {
   const [banners, setBanners] = useState<BannerData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
@@ -52,57 +60,44 @@ export default function AdBanner({ slot, className, rotationInterval = 6000 }: A
   };
 
   return (
-    <div className={cn("w-full flex justify-center my-4", className)}>
-      {/* Container Principal: 
-          - No PC: max-w-screen-xl (para não ficar infinitamente largo)
-          - No celular: w-full
-      */}
-      <div className="relative w-full max-w-[1400px] overflow-hidden group">
-        
-        {/* Container da Imagem com proporção flexível */}
+    <div className={cn("w-full flex justify-center px-4 my-4", className)}>
+      <div className={cn(
+        "relative rounded-xl overflow-hidden group bg-white border shadow-sm", 
+        sizeMap[size]
+      )}>
+        {/* Container da Imagem */}
         <div
-          className="w-full cursor-pointer flex items-center justify-center"
+          className="w-full h-full cursor-pointer flex items-center justify-center p-0"
           onClick={handleClick}
         >
           <img
             key={current.id}
             src={current.image_url}
             alt={current.title || 'Publicidade'}
-            /* ESTILO DO EXEMPLO:
-               - w-full h-auto: faz a imagem ocupar toda a largura e a altura seguir o desenho da foto.
-               - object-fill: garante que preencha o espaço (como no código que você mandou).
-            */
-            className="w-full h-auto object-fill block transition-opacity duration-500 rounded-lg md:rounded-xl"
+            // O segredo está aqui: h-full + object-contain
+            // A imagem preenche a altura do container sem esticar a largura
+            className="w-full h-full object-contain md:object-fill transition-all duration-500"
           />
         </div>
 
-        {/* Setas de Navegação (Estilo flutuante do exemplo) */}
+        {/* Setas e Dots (Mesma lógica anterior) */}
         {banners.length > 1 && (
           <>
-            <button 
-              onClick={(e) => { e.stopPropagation(); goTo(-1); }} 
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-800" />
+            <button onClick={(e) => { e.stopPropagation(); goTo(-1); }} className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
             </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); goTo(1); }} 
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-800" />
+            <button onClick={(e) => { e.stopPropagation(); goTo(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <ChevronRight className="w-5 h-5 text-gray-700" />
             </button>
 
-            {/* Dots (Indicadores) */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
               {banners.map((_, i) => (
                 <button
                   key={i}
                   onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
                   className={cn(
-                    "h-2 rounded-full transition-all duration-300 shadow-sm",
-                    i === currentIndex 
-                      ? "bg-white w-8" 
-                      : "bg-white/50 w-2 hover:bg-white/80"
+                    "h-1.5 rounded-full transition-all duration-300",
+                    i === currentIndex ? "bg-primary w-6" : "bg-gray-300 w-1.5"
                   )}
                 />
               ))}
