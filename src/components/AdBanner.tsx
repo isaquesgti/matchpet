@@ -18,7 +18,7 @@ interface AdBannerProps {
 }
 
 const sizeMap = {
-  // Ajustamos as proporções para serem mais flexíveis
+  // Mantemos as proporções de aspecto para o container, mas a imagem lá dentro será livre
   leaderboard: "w-full max-w-5xl aspect-[3/1] md:aspect-[8/1]",
   medium: "w-full max-w-2xl aspect-[16/9] md:aspect-[21/9]",
   slim: "w-full max-w-6xl aspect-[5/1] md:aspect-[12/1]",
@@ -64,31 +64,57 @@ export default function AdBanner({ slot, className, size = "leaderboard", rotati
   return (
     <div className={cn("w-full flex justify-center px-2 my-4", className)}>
       <div className={cn(
-        "relative rounded-lg overflow-hidden group border bg-white", 
+        "relative rounded-lg overflow-hidden group border bg-white flex items-center justify-center", 
         sizeMap[size]
       )}>
+        {/* Container da Imagem */}
         <div
-          className="w-full h-full cursor-pointer"
+          className="w-full h-full cursor-pointer flex items-center justify-center p-1"
           onClick={handleClick}
         >
           <img
+            key={current.id}
             src={current.image_url}
             alt={current.title || 'Publicidade'}
-            // MUDANÇA CHAVE AQUI:
-            // Usamos 'object-contain' para garantir que a imagem inteira apareça.
-            // 'bg-white' ou 'bg-transparent' evita faixas pretas se a imagem for menor.
-            className="w-full h-full object-contain md:object-fill transition-all duration-500"
+            // object-contain garante que a imagem caiba inteira sem esticar nem cortar
+            className="max-w-full max-h-full object-contain transition-opacity duration-500"
           />
         </div>
 
+        {/* Setas de Navegação */}
         {banners.length > 1 && (
           <>
-            <button onClick={(e) => { e.stopPropagation(); goTo(-1); }} className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              onClick={(e) => { e.stopPropagation(); goTo(-1); }} 
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Anterior"
+            >
               <ChevronLeft className="w-5 h-5 text-gray-700" />
             </button>
-            <button onClick={(e) => { e.stopPropagation(); goTo(1); }} className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              onClick={(e) => { e.stopPropagation(); goTo(1); }} 
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Próximo"
+            >
               <ChevronRight className="w-5 h-5 text-gray-700" />
             </button>
+
+            {/* Pontinhos (Dots) Indicadores */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+              {banners.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-300",
+                    i === currentIndex 
+                      ? "bg-primary w-5" // Dot ativo colorido e mais largo
+                      : "bg-gray-300 w-1.5 hover:bg-gray-400"
+                  )}
+                  aria-label={`Ir para banner ${i + 1}`}
+                />
+              ))}
+            </div>
           </>
         )}
       </div>
