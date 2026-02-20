@@ -16,6 +16,7 @@ import PetDetails from "./pages/PetDetails";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import TermsPage from "./components/Terms"; // Importando Termos
+import PrivacyPage from "./components/Privacy"; // Importando Privacidade
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/termos" element={<TermsPage />} />
+            <Route path="/privacidade" element={<PrivacyPage />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
