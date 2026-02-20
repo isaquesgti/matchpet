@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import { Link } from "react-router-dom"; // Importação necessária
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -29,13 +29,11 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Legal</h4>
             <ul className="space-y-2 text-muted-foreground">
-              {/* Links apontando para as rotas que você criou */}
               <li>
                 <Link to="/termos" className="hover:text-primary transition-colors">
                   Termos de Uso
                 </Link>
               </li>
-              <li>
               <li>
                 <Link to="/privacidade" className="hover:text-primary transition-colors">
                   Privacidade
