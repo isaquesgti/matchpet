@@ -30,16 +30,16 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground mb-4">Legal</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <Link to="/termos" className="hover:text-primary transition-colors">
+                <Link to="/termos" onClick={() => window.scrollTo(0, 0)} className="hover:text-primary transition-colors">
                   Termos de Uso
                 </Link>
               </li>
               <li>
-                <Link to="/privacidade" className="hover:text-primary transition-colors">
+                <Link to="/privacidade" onClick={() => window.scrollTo(0, 0)} className="hover:text-primary transition-colors">
                   Privacidade
                 </Link>
               </li>
-              <li><Link to="/contato" className="hover:text-primary transition-colors">Contato</Link></li>
+              <li><Link to="/contato" onClick={() => window.scrollTo(0, 0)} className="hover:text-primary transition-colors">Contato</Link></li>
             </ul>
           </div>
         </div>
