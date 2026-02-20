@@ -13,7 +13,7 @@ export default function Navbar() {
           <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-md">
             <Heart className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-bold text-xl text-foreground">PetMatchMate</span>
+          <span className="font-bold text-xl text-foreground">LovixPet</span>
         </Link>
         
         <div className="flex items-center gap-4">
