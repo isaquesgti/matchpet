@@ -2,6 +2,11 @@ import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
+  // Função para garantir que a página suba ao topo ao clicar em qualquer link
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer className="bg-muted/50 border-t border-border">
       <div className="container mx-auto px-4 py-12">
@@ -20,9 +25,21 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Sobre</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li><Link to="/como-funciona" className="hover:text-primary transition-colors">Como Funciona</Link></li>
-              <li><Link to="/seguranca" className="hover:text-primary transition-colors">Segurança</Link></li>
-              <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
+              <li>
+                <Link to="/como-funciona" onClick={scrollToTop} className="hover:text-primary transition-colors">
+                  Como Funciona
+                </Link>
+              </li>
+              <li>
+                <Link to="/seguranca" onClick={scrollToTop} className="hover:text-primary transition-colors">
+                  Segurança
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" onClick={scrollToTop} className="hover:text-primary transition-colors">
+                  FAQ
+                </Link>
+              </li>
             </ul>
           </div>
           
@@ -30,22 +47,29 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground mb-4">Legal</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <Link to="/termos" onClick={() => window.scrollTo(0, 0)} className="hover:text-primary transition-colors">
+                <Link to="/termos" onClick={scrollToTop} className="hover:text-primary transition-colors">
                   Termos de Uso
                 </Link>
               </li>
               <li>
-                <Link to="/privacidade" onClick={() => window.scrollTo(0, 0)} className="hover:text-primary transition-colors">
+                <Link to="/privacidade" onClick={scrollToTop} className="hover:text-primary transition-colors">
                   Privacidade
                 </Link>
               </li>
-              <li><Link to="/contato" onClick={() => window.scrollTo(0, 0)} className="hover:text-primary transition-colors">Contato</Link></li>
+              <li>
+                <Link to="/contato" onClick={scrollToTop} className="hover:text-primary transition-colors">
+                  Contato
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-border pt-8 text-center text-muted-foreground">
-          <p>&copy; 2026 LovixPet. Todos os direitos reservados. Feito com <Heart className="inline w-4 h-4 text-primary" /> para pets.</p>
+          <p>
+            &copy; 2026 LovixPet. Todos os direitos reservados. Feito com{" "}
+            <Heart className="inline w-4 h-4 text-primary fill-primary" /> para pets.
+          </p>
         </div>
       </div>
     </footer>
