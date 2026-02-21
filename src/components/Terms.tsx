@@ -1,5 +1,5 @@
 import React from "react";
-import { ShieldCheck, UserCheck, Ban, Info, Scale, Copyright, AlertTriangle, MessageSquare, Lock } from "lucide-react";
+import { ShieldCheck, UserCheck, Ban, Info, Scale, Copyright, AlertTriangle, MessageSquare, Lock, AlertCircle } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
@@ -18,113 +18,180 @@ const TermsPage = () => {
               Termos de Uso
             </h1>
           </div>
-          <p className="text-muted-foreground italic">
-            🐾 **LovixPet** — Última atualização: Fevereiro de 2026
+          <p className="text-muted-foreground">
+            🐾 **LovixPet** — Última atualização: Fevereiro de 2025
           </p>
         </div>
 
         <div className="space-y-12 text-muted-foreground leading-relaxed">
           
-          {/* 1. Aceitação */}
+          {/* 1. Aceitação dos Termos */}
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
               <span className="text-primary">1.</span> Aceitação dos Termos
             </h2>
-            <p className="text-lg">
-              Ao acessar ou utilizar a plataforma **LovixPet** ("Plataforma"), você concorda em cumprir estes Termos de Uso. A LovixPet é uma plataforma que conecta tutores para fins de cruzamento responsável de cães e gatos.
-            </p>
+            <div className="space-y-4">
+              <p>
+                Ao acessar ou utilizar a plataforma LovixPet ("Plataforma"), você concorda em cumprir e estar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não utilize nossos serviços.
+              </p>
+              <p>
+                A LovixPet é uma plataforma digital que conecta tutores de animais de estimação para fins de cruzamento responsável de cães e gatos. Nossos serviços são destinados exclusivamente a maiores de 18 anos.
+              </p>
+            </div>
           </section>
 
-          {/* 2. Elegibilidade */}
+          {/* 2. Elegibilidade e Cadastro */}
           <section className="bg-muted/30 p-6 rounded-xl border border-border">
             <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
               <UserCheck className="w-6 h-6 text-primary" /> 2. Elegibilidade e Cadastro
             </h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-6">
               <div>
                 <h3 className="font-semibold text-foreground mb-2">2.1 Requisitos</h3>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
-                  <li>Ter 18 anos ou mais;</li>
-                  <li>Capacidade civil plena;</li>
-                  <li>Informações verdadeiras;</li>
-                  <li>Ser o tutor legítimo do animal.</li>
+                  <li>Ter 18 anos ou mais de idade</li>
+                  <li>Possuir plena capacidade civil</li>
+                  <li>Fornecer informações verdadeiras e atualizadas no cadastro</li>
+                  <li>Ser o legítimo tutor ou responsável legal pelo animal cadastrado</li>
                 </ul>
               </div>
               <div>
-                <h3 className="font-semibold text-foreground mb-2">2.2 Conta</h3>
+                <h3 className="font-semibold text-foreground mb-2">2.2 Conta de Usuário</h3>
                 <p className="text-sm">
-                  Você é o único responsável pela segurança da sua senha e por todas as atividades em sua conta.
+                  Você é responsável por manter a confidencialidade de suas credenciais de acesso e por todas as atividades realizadas em sua conta. Notifique-nos imediatamente em caso de uso não autorizado.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* 3. Uso Proibido */}
+          {/* 3. Uso da Plataforma */}
           <section>
-            <div className="bg-destructive/5 border-l-4 border-destructive p-6 rounded-r-lg">
-              <h3 className="font-bold text-destructive mb-4 flex items-center gap-2 uppercase tracking-wide">
-                <Ban className="w-6 h-6" /> 3. Condutas Proibidas
-              </h3>
-              <ul className="grid md:grid-cols-2 gap-x-8 gap-y-2 list-disc pl-5 text-sm">
-                <li>Venda de filhotes sem autorização;</li>
-                <li>Maus-tratos ou negligência animal;</li>
-                <li>Cruzamentos consanguíneos;</li>
-                <li>Uso de informações falsas ou fakes;</li>
-                <li>Coleta de dados de terceiros;</li>
-                <li>Atividades fraudulentas ou criminosas.</li>
-              </ul>
+            <h2 className="text-2xl font-bold text-foreground mb-4">3. Uso da Plataforma</h2>
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">3.1 Uso Permitido</h3>
+                <p className="text-sm">
+                  A Plataforma destina-se exclusivamente à conexão de tutores interessados em cruzamento responsável de seus animais de estimação. Você concorda em utilizar a Plataforma de forma ética, responsável e em conformidade com a legislação vigente.
+                </p>
+              </div>
+              <div className="bg-destructive/5 border-l-4 border-destructive p-5 rounded-r-lg">
+                <h3 className="font-bold text-destructive mb-3 flex items-center gap-2 uppercase">
+                  <Ban className="w-5 h-5" /> 3.2 Uso Proibido
+                </h3>
+                <p className="text-sm mb-2 font-semibold text-destructive">É expressamente proibido:</p>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Utilizar a Plataforma para fins comerciais de venda de filhotes sem autorização expressa</li>
+                  <li>Cadastrar animais com informações falsas, adulteradas ou enganosas</li>
+                  <li>Praticar qualquer forma de abuso, maus-tratos ou negligência animal</li>
+                  <li>Publicar conteúdo ofensivo, discriminatório, obsceno ou ilegal</li>
+                  <li>Realizar cruzamentos consanguíneos ou que prejudiquem a saúde dos animais</li>
+                  <li>Usar a Plataforma para atividades fraudulentas ou criminosas</li>
+                  <li>Coletar dados de outros usuários sem consentimento</li>
+                  <li>Interferir no funcionamento técnico da Plataforma</li>
+                </ul>
+              </div>
             </div>
           </section>
 
           {/* 4. Perfis de Pets */}
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-4">4. Perfis de Pets</h2>
-            <div className="border border-border p-5 rounded-lg space-y-3 bg-background shadow-sm">
-              <p className="text-sm italic">Você garante que o animal está saudável e apto para cruzamento.</p>
-              <div className="flex items-start gap-2 text-primary font-medium">
+            <div className="border border-border p-6 rounded-lg space-y-4 bg-background shadow-sm">
+              <p className="text-sm font-semibold text-foreground">Ao criar um perfil para seu animal, você declara e garante que:</p>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>As informações fornecidas (raça, idade, saúde, vacinação) são verdadeiras e precisas</li>
+                <li>O animal está em boas condições de saúde e apto para cruzamento</li>
+                <li>Você possui autorização veterinária ou acompanhamento profissional adequado</li>
+                <li>As fotos publicadas pertencem ao seu animal e não violam direitos de terceiros</li>
+              </ul>
+              <div className="flex items-start gap-2 text-primary font-medium italic border-t pt-4">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-                <p className="text-sm">Recomendamos orientação veterinária e vacinação rigorosamente em dia.</p>
+                <p className="text-sm">A LovixPet recomenda enfaticamente que cruzamentos sejam realizados com orientação veterinária e que ambos os animais possuam carteira de vacinação atualizada.</p>
               </div>
             </div>
           </section>
 
-          {/* 5. Match e Comunicação */}
+          {/* 5. Sistema de Match e Comunicação */}
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-primary" /> 5. Match e Chat
+              <MessageSquare className="w-6 h-6 text-primary" /> 5. Sistema de Match e Comunicação
             </h2>
-            <p className="text-sm mb-4">
-              A LovixPet fornece a tecnologia de conexão, mas <strong>não monitora</strong> o conteúdo das conversas. A comunicação é de responsabilidade integral dos usuários. Não garantimos compatibilidade genética ou saúde dos animais.
-            </p>
+            <div className="space-y-4 text-sm">
+              <p>O sistema de match conecta perfis compatíveis com base em informações cadastradas. A LovixPet não garante a compatibilidade genética, comportamental ou de saúde dos animais conectados pela Plataforma.</p>
+              <p>A comunicação entre usuários ocorre exclusivamente por meio do chat interno da Plataforma e é de responsabilidade integral das partes envolvidas. A LovixPet não monitora, não modera e não se responsabiliza pelo conteúdo das conversas trocadas entre usuários.</p>
+              <p>A LovixPet não é parte dos acordos firmados entre tutores e não se responsabiliza por qualquer promessa, combinação, transação financeira ou encontro decorrente dessas conversas.</p>
+            </div>
           </section>
 
-          {/* 6. SEGURANÇA PESSOAL - ESSENCIAL */}
-          <section className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 p-6 rounded-xl">
-            <h2 className="text-2xl font-bold text-amber-700 dark:text-amber-500 mb-4 flex items-center gap-2">
-              <Lock className="w-6 h-6" /> 6. Segurança e Responsabilidade
+          {/* 6. Segurança Pessoal e Responsabilidade */}
+          <section className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-6 rounded-xl">
+            <h2 className="text-2xl font-bold text-amber-800 dark:text-amber-500 mb-6 flex items-center gap-2">
+              <Lock className="w-6 h-6" /> 6. Segurança Pessoal e Responsabilidade nas Interações
             </h2>
-            <div className="space-y-4 text-sm text-amber-900/80 dark:text-amber-200/80">
-              <p><strong>Isenção:</strong> A LovixPet NÃO se responsabiliza por crimes, golpes, furtos ou violência ocorridos em encontros presenciais. Você interage por sua conta e risco.</p>
+            
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-lg font-bold text-amber-900 dark:text-amber-400 mb-3">6.1 Isenção de Responsabilidade por Condutas de Terceiros</h3>
+                <p className="text-sm mb-2 italic font-semibold">A LovixPet é uma plataforma de intermediação digital e NÃO se responsabiliza, em nenhuma hipótese, por:</p>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Crimes, golpes, fraudes, estelionato ou quaisquer atos ilícitos praticados por outros usuários</li>
+                  <li>Roubos, furtos, extorsões ou qualquer forma de violência ocorrida em encontros combinados pela Plataforma</li>
+                  <li>Enganos, promessas não cumpridas, acordos descumpridos ou desentendimentos entre usuários</li>
+                  <li>Conteúdo falso, enganoso ou malicioso compartilhado por terceiros no chat ou nos perfis</li>
+                  <li>Danos morais, materiais ou físicos sofridos em decorrência de interações realizadas fora da Plataforma</li>
+                  <li>Qualquer prejuízo resultante de encontros presenciais organizados entre usuários</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-amber-900 dark:text-amber-400 mb-3">6.2 Recomendações de Segurança — Dados Pessoais Sensíveis</h3>
+                <p className="text-sm mb-2 font-semibold">Para sua proteção, a LovixPet RECOMENDA FORTEMENTE que os usuários:</p>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Nunca compartilhem número de telefone, endereço residencial ou de trabalho no chat antes de estabelecer confiança com o outro usuário</li>
+                  <li>Nunca realizem pagamentos antecipados ou transferências financeiras a outros usuários pela Plataforma</li>
+                  <li>Realizem os primeiros encontros com os pets em locais públicos, movimentados e seguros</li>
+                  <li>Levem um acompanhante ao primeiro encontro presencial</li>
+                  <li>Desconfiem de perfis que peçam dados pessoais, dinheiro ou favores logo nos primeiros contatos</li>
+                  <li>Denunciem imediatamente à LovixPet qualquer usuário suspeito, abusivo ou com comportamento inadequado</li>
+                </ul>
+                <p className="mt-4 text-xs italic">A LovixPet disponibiliza ferramenta de denúncia em todos os perfis e conversas. Utilize-a sem hesitar.</p>
+              </div>
+
               <div className="bg-white/50 dark:bg-black/20 p-4 rounded-lg">
-                <p className="font-bold mb-2 text-amber-800 dark:text-amber-400">Recomendações de Ouro:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Nunca compartilhe endereço ou telefone logo de início;</li>
-                  <li>Realize encontros em locais públicos e movimentados;</li>
-                  <li>Leve um acompanhante;</li>
-                  <li>Nunca faça pagamentos ou transferências para outros usuários.</li>
+                <h3 className="text-lg font-bold text-amber-900 dark:text-amber-400 mb-3">6.3 Uso do Chat Interno — Proibições</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  <li>Solicitar ou compartilhar dados pessoais sensíveis (CPF, dados bancários, senhas)</li>
+                  <li>Enviar links suspeitos, malware, phishing ou conteúdo malicioso</li>
+                  <li>Assediar, ameaçar, chantagear ou praticar qualquer forma de violência verbal</li>
+                  <li>Realizar negociações financeiras de qualquer natureza</li>
+                  <li>Combinar atividades ilegais ou contrárias a estes Termos</li>
                 </ul>
               </div>
             </div>
           </section>
 
-          {/* 7. Responsabilidades e Limitação */}
+          {/* 7. Responsabilidades */}
           <section>
             <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Scale className="w-6 h-6 text-primary" /> 7. Limitação de Responsabilidade
+              <Scale className="w-6 h-6 text-primary" /> 7. Responsabilidades
             </h2>
-            <p className="text-sm">
-              A LovixPet é uma intermediadora. Não nos responsabilizamos por brigas entre tutores, danos à saúde dos pets pós-cruzamento ou informações enganosas inseridas por usuários.
-            </p>
+            <div className="grid md:grid-cols-2 gap-8 text-sm">
+              <div className="space-y-3">
+                <h3 className="font-bold text-foreground">7.1 Responsabilidade do Usuário</h3>
+                <p>O usuário é inteiramente responsável pelo bem-estar do seu animal, pelas decisões de cruzamento, por sua própria segurança pessoal e por quaisquer acordos firmados com outros usuários por meio da Plataforma. Ao optar por se encontrar com outro usuário, o faz por sua conta e risco.</p>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-bold text-foreground">7.2 Limitação de Responsabilidade da LovixPet</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Danos à saúde dos animais</li>
+                  <li>Disputas, crimes ou ilícitos entre usuários</li>
+                  <li>Informações falsas fornecidas por terceiros</li>
+                  <li>Roubos, fraudes ou golpes praticados por usuários</li>
+                  <li>Consequências de encontros presenciais</li>
+                  <li>Perdas financeiras de qualquer natureza</li>
+                </ul>
+              </div>
+            </div>
           </section>
 
           {/* 8. Propriedade Intelectual */}
@@ -133,21 +200,39 @@ const TermsPage = () => {
               <Copyright className="w-6 h-6 text-primary" /> 8. Propriedade Intelectual
             </h2>
             <p className="text-sm">
-              A marca e o design LovixPet são protegidos. Ao postar fotos do seu pet, você nos autoriza a exibi-las dentro das funcionalidades da plataforma.
+              Todos os direitos de propriedade intelectual relativos à Plataforma LovixPet — incluindo marca, logotipo, design, código-fonte e conteúdo — pertencem exclusivamente à LovixPet. Ao publicar conteúdo, você concede à LovixPet licença não exclusiva e gratuita para exibição exclusivamente para operação da Plataforma.
             </p>
           </section>
 
-          {/* 10. Legislação */}
-          <section className="bg-muted/50 p-6 rounded-xl border border-border text-center">
-            <h2 className="text-xl font-bold text-foreground mb-2">10. Legislação Aplicável</h2>
-            <p className="text-sm">
-              Termos regidos pelas leis do Brasil. Foro eleito: Comarca de domicílio do usuário.
-            </p>
+          {/* 9. Suspensão e Encerramento */}
+          <section>
+            <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <AlertCircle className="w-6 h-6 text-destructive" /> 9. Suspensão e Encerramento de Conta
+            </h2>
+            <p className="text-sm mb-3">A LovixPet reserva-se o direito de suspender ou encerrar sua conta em caso de:</p>
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              <li>Violação destes Termos</li>
+              <li>Suspeita de fraude ou atividade ilícita</li>
+              <li>Denúncias de maus-tratos animais</li>
+              <li>Informações falsas</li>
+            </ul>
           </section>
+
+          {/* 10 e 11. Alterações e Legislação */}
+          <div className="grid md:grid-cols-2 gap-8">
+            <section className="bg-muted/50 p-6 rounded-xl border border-border">
+              <h2 className="text-xl font-bold text-foreground mb-3">10. Alterações nos Termos</h2>
+              <p className="text-xs">A LovixPet pode modificar estes Termos a qualquer momento. Alterações relevantes serão comunicadas com 15 dias de antecedência. O uso continuado implica concordância.</p>
+            </section>
+            <section className="bg-muted/50 p-6 rounded-xl border border-border">
+              <h2 className="text-xl font-bold text-foreground mb-3">11. Legislação e Foro</h2>
+              <p className="text-xs">Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da comarca de domicílio do usuário.</p>
+            </section>
+          </div>
 
           {/* Rodapé de Contato */}
           <footer className="pt-8 border-t border-border text-center">
-            <p className="text-foreground font-semibold">Dúvidas ou denúncias?</p>
+            <p className="text-foreground font-semibold">Dúvidas ou sugestões?</p>
             <a href="mailto:contato@lovixpet.com.br" className="text-primary hover:underline font-bold text-lg block mt-2">
               contato@lovixpet.com.br
             </a>
