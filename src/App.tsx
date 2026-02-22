@@ -20,7 +20,7 @@ import TermsPage from "./components/Terms";
 import Privacy from "./components/Privacy"; 
 import SecurityPage from "./components/Seguranca"; 
 import FAQItem from "./components/Faq";
-import ComoFunciona from "./components/Comofunciona";
+import ComoFunciona from "./components/ComoFunciona";
 
 
 const queryClient = new QueryClient();
