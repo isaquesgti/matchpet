@@ -66,8 +66,8 @@ const App = () => (
             <Route path="/termos" element={<TermsPage />} />
             <Route path="/privacidade" element={<Privacy />} />
             <Route path="/faq" element={<FAQItem />} />
-            <eRoute path="/seguranca" element={<SecurityPage />} />
-            <eRoute path="/comofunciona" element={<StepCard />} />
+            <Route path="/seguranca" element={<SecurityPage />} />
+            <Route path="/comofunciona" element={<StepCard />} />
             
             {/* Rota 404 - Sempre por último */}
             <Route path="*" element={<NotFound />} />
