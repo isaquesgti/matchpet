@@ -266,7 +266,7 @@ const ComoFunciona = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="/register"
+              href="https://lovixpet.lovable.app/auth"
               className="inline-block bg-white text-primary font-bold px-8 py-3 rounded-full hover:bg-muted transition-colors"
             >
               Criar Perfil do meu Pet
