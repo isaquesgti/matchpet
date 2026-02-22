@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Heart, MessageCircle, PawPrint } from 'lucide-react';
 import { toast } from 'sonner';
 import AdBanner from '@/components/AdBanner';
+import ReportDialog from '@/components/ReportDialog';
 
 interface Match {
   id: string;
@@ -18,6 +19,8 @@ interface Match {
     breed: string | null;
     photos: string[] | null;
     owner: {
+      id: string;
+      user_id: string;
       full_name: string;
       city: string | null;
       state: string | null;
@@ -97,6 +100,8 @@ export default function Matches() {
             breed,
             photos,
             owner:profiles!pets_owner_id_fkey (
+              id,
+              user_id,
               full_name,
               city,
               state
@@ -207,18 +212,26 @@ export default function Matches() {
                       </p>
                     </div>
 
-                    {/* Action */}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="flex-shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/chat/${match.id}`);
-                      }}
-                    >
-                      <MessageCircle className="w-5 h-5 text-primary" />
-                    </Button>
+                    {/* Actions */}
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/chat/${match.id}`);
+                        }}
+                      >
+                        <MessageCircle className="w-5 h-5 text-primary" />
+                      </Button>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <ReportDialog
+                          reportedUserId={match.pet.owner.user_id}
+                          matchId={match.id}
+                          reportedName={match.pet.owner.full_name}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

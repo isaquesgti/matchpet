@@ -1,23 +1,37 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Heart, Mail, Lock, User } from 'lucide-react';
+import { Heart, Mail, Lock, User, Calendar } from 'lucide-react';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'A senha deve ter pelo menos 6 caracteres');
 const nameSchema = z.string().min(2, 'O nome deve ter pelo menos 2 caracteres');
 
+function calculateAge(birthDate: string): number {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -34,6 +48,18 @@ export default function Auth() {
       passwordSchema.parse(password);
       if (!isLogin) {
         nameSchema.parse(fullName);
+        if (!birthDate) {
+          toast.error('Informe sua data de nascimento');
+          return false;
+        }
+        if (calculateAge(birthDate) < 18) {
+          toast.error('Você precisa ter pelo menos 18 anos para se cadastrar');
+          return false;
+        }
+        if (!acceptedTerms) {
+          toast.error('Você precisa aceitar os Termos de Uso para se cadastrar');
+          return false;
+        }
       }
       return true;
     } catch (err) {
@@ -73,8 +99,12 @@ export default function Auth() {
             toast.error('Erro ao criar conta. Tente novamente.');
           }
         } else {
-          toast.success('Conta criada com sucesso!');
-          navigate('/dashboard');
+          // Save birth_date and terms acceptance to profile after signup
+          toast.success('Conta criada! Complete seu perfil.');
+          // Store temporarily to save after profile is created
+          localStorage.setItem('pending_birth_date', birthDate);
+          localStorage.setItem('pending_terms_accepted', 'true');
+          navigate('/profile');
         }
       }
     } finally {
@@ -161,6 +191,45 @@ export default function Auth() {
                 />
               </div>
             </div>
+
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="birthDate" className="text-foreground">Data de Nascimento</Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="birthDate"
+                      type="date"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                      className="pl-10"
+                      required={!isLogin}
+                      max={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Você deve ter pelo menos 18 anos</p>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3 rounded-lg border border-border bg-muted/30">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                  />
+                  <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
+                    Li e aceito os{' '}
+                    <Link to="/termos" target="_blank" className="text-primary hover:underline font-medium">
+                      Termos de Uso
+                    </Link>{' '}
+                    e a{' '}
+                    <Link to="/privacidade" target="_blank" className="text-primary hover:underline font-medium">
+                      Política de Privacidade
+                    </Link>
+                  </label>
+                </div>
+              </>
+            )}
 
             <Button
               type="submit"

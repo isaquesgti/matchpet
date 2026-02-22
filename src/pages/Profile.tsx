@@ -77,6 +77,24 @@ export default function Profile() {
         if (data.latitude && data.longitude) {
           setCoordinates({ lat: data.latitude, lng: data.longitude });
         }
+
+        // Check if there's pending data from registration
+        const pendingBirthDate = localStorage.getItem('pending_birth_date');
+        const pendingTerms = localStorage.getItem('pending_terms_accepted');
+        
+        if (pendingBirthDate || pendingTerms) {
+          const updateData: Record<string, any> = {};
+          if (pendingBirthDate) updateData.birth_date = pendingBirthDate;
+          if (pendingTerms) updateData.accepted_terms_at = new Date().toISOString();
+          
+          await supabase
+            .from('profiles')
+            .update(updateData)
+            .eq('id', data.id);
+          
+          localStorage.removeItem('pending_birth_date');
+          localStorage.removeItem('pending_terms_accepted');
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -96,16 +114,11 @@ export default function Profile() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        
-        // Reduce coordinate precision for privacy (~1km accuracy)
-        // This prevents exposing exact user location to third-party services
         const roundedLat = Math.round(latitude * 100) / 100;
         const roundedLon = Math.round(longitude * 100) / 100;
         
         setCoordinates({ lat: latitude, lng: longitude });
         
-        // Try to get city/state from coordinates using reverse geocoding
-        // Using reduced precision coordinates for privacy
         try {
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${roundedLat}&lon=${roundedLon}&accept-language=pt`
@@ -183,7 +196,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
-      {/* Header */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
@@ -204,7 +216,6 @@ export default function Profile() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Nome */}
                 <FormField
                   control={form.control}
                   name="full_name"
@@ -219,7 +230,13 @@ export default function Profile() {
                   )}
                 />
 
-                {/* Telefone */}
+                {/* Email (read-only) */}
+                <div className="space-y-2">
+                  <FormLabel>Email</FormLabel>
+                  <Input value={user?.email || ''} disabled className="bg-muted/50" />
+                  <p className="text-xs text-muted-foreground">O email não pode ser alterado</p>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="phone"
@@ -310,7 +327,6 @@ export default function Profile() {
                   </FormDescription>
                 </div>
 
-                {/* Submit */}
                 <Button type="submit" disabled={saving} className="w-full">
                   {saving ? (
                     <>
@@ -326,7 +342,6 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Danger Zone */}
         <Card className="border-destructive/50 bg-card/80">
           <CardHeader>
             <CardTitle className="text-destructive">Zona de Perigo</CardTitle>

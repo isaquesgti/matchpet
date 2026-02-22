@@ -65,6 +65,15 @@ export default function Dashboard() {
         .maybeSingle();
 
       if (profileError) throw profileError;
+
+      // Check if user is blocked
+      if (profileData?.is_blocked) {
+        toast.error('Sua conta foi bloqueada. Entre em contato com o suporte.');
+        await signOut();
+        navigate('/');
+        return;
+      }
+
       setProfile(profileData);
 
       if (profileData) {
