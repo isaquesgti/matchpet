@@ -26,7 +26,7 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground mb-4">Sobre</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <Link to="/como-funciona" onClick={scrollToTop} className="hover:text-primary transition-colors">
+                <Link to="/comofunciona" onClick={scrollToTop} className="hover:text-primary transition-colors">
                   Como Funciona
                 </Link>
               </li>
