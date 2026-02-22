@@ -234,12 +234,15 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accepted_terms_at: string | null
           avatar_url: string | null
+          birth_date: string | null
           city: string | null
           country: string | null
           created_at: string
           full_name: string
           id: string
+          is_blocked: boolean
           latitude: number | null
           longitude: number | null
           phone: string | null
@@ -248,12 +251,15 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accepted_terms_at?: string | null
           avatar_url?: string | null
+          birth_date?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           full_name: string
           id?: string
+          is_blocked?: boolean
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
@@ -262,12 +268,15 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accepted_terms_at?: string | null
           avatar_url?: string | null
+          birth_date?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           full_name?: string
           id?: string
+          is_blocked?: boolean
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
@@ -276,6 +285,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          match_id: string | null
+          reason: string
+          reported_user_id: string
+          reporter_user_id: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          reason: string
+          reported_user_id: string
+          reporter_user_id: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          reason?: string
+          reported_user_id?: string
+          reporter_user_id?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       swipes: {
         Row: {

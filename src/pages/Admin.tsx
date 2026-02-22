@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Heart, Plus, Trash2, Upload, ExternalLink, Eye, MousePointerClick, BarChart3 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Heart, Plus, Trash2, Upload, ExternalLink, Eye, MousePointerClick, BarChart3, AlertTriangle, Ban, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Banner {
   id: string;
@@ -29,6 +31,18 @@ interface BannerStat {
   ctr: number;
 }
 
+interface Report {
+  id: string;
+  reporter_user_id: string;
+  reported_user_id: string;
+  match_id: string | null;
+  reason: string;
+  status: string;
+  admin_notes: string | null;
+  created_at: string;
+  resolved_at: string | null;
+}
+
 const SLOT_OPTIONS = [
   { value: 'home-top', label: 'Home - Topo' },
   { value: 'home-mid', label: 'Home - Meio' },
@@ -42,8 +56,10 @@ export default function Admin() {
   const navigate = useNavigate();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [stats, setStats] = useState<Record<string, BannerStat>>({});
+  const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [adminNotes, setAdminNotes] = useState<Record<string, string>>({});
 
   // New banner form
   const [newSlot, setNewSlot] = useState('home-top');
@@ -59,7 +75,10 @@ export default function Admin() {
   }, [isAdmin, adminLoading, navigate]);
 
   useEffect(() => {
-    if (isAdmin) fetchBanners();
+    if (isAdmin) {
+      fetchBanners();
+      fetchReports();
+    }
   }, [isAdmin]);
 
   const fetchBanners = async () => {
@@ -82,6 +101,53 @@ export default function Admin() {
       setStats(statsMap);
     }
     setLoading(false);
+  };
+
+  const fetchReports = async () => {
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setReports(data as Report[]);
+    }
+  };
+
+  const handleResolveReport = async (reportId: string, action: 'resolved' | 'blocked') => {
+    const notes = adminNotes[reportId] || '';
+    
+    try {
+      // Update report status
+      const { error: reportError } = await supabase
+        .from('reports')
+        .update({ 
+          status: action, 
+          admin_notes: notes || null,
+          resolved_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (reportError) throw reportError;
+
+      // If blocking, update the reported user's profile
+      if (action === 'blocked') {
+        const report = reports.find(r => r.id === reportId);
+        if (report) {
+          const { error: blockError } = await supabase
+            .from('profiles')
+            .update({ is_blocked: true })
+            .eq('user_id', report.reported_user_id);
+
+          if (blockError) throw blockError;
+        }
+      }
+
+      toast.success(action === 'blocked' ? 'Usuário bloqueado!' : 'Denúncia resolvida');
+      fetchReports();
+    } catch (error: any) {
+      toast.error('Erro ao processar denúncia');
+    }
   };
 
   const handleUpload = async () => {
@@ -187,124 +253,222 @@ export default function Admin() {
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <span className="font-bold text-xl text-foreground">Painel Admin — Banners</span>
+          <span className="font-bold text-xl text-foreground">Painel Admin</span>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-3xl space-y-8">
-        {/* Add New Banner */}
-        <Card className="border-border/50 bg-card/80">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <Plus className="w-5 h-5" /> Novo Banner
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Posição (slot)</Label>
-                <Select value={newSlot} onValueChange={setNewSlot}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SLOT_OPTIONS.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Título (opcional)</Label>
-                <Input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Ex: Promoção Pet Shop" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Link de destino (opcional)</Label>
-              <Input value={newLink} onChange={e => setNewLink(e.target.value)} placeholder="https://exemplo.com" />
-            </div>
-            <div className="space-y-2">
-              <Label>Imagem do Banner</Label>
-              <Input
-                id="banner-file"
-                type="file"
-                accept="image/*"
-                onChange={e => setNewFile(e.target.files?.[0] || null)}
-              />
-            </div>
-            <Button onClick={handleUpload} disabled={uploading || !newFile}>
-              <Upload className="w-4 h-4 mr-2" />
-              {uploading ? 'Enviando...' : 'Adicionar Banner'}
-            </Button>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="banners">
+          <TabsList className="mb-6">
+            <TabsTrigger value="banners">Banners</TabsTrigger>
+            <TabsTrigger value="reports" className="relative">
+              Denúncias
+              {reports.filter(r => r.status === 'pending').length > 0 && (
+                <Badge className="ml-2 bg-destructive text-destructive-foreground text-xs px-1.5">
+                  {reports.filter(r => r.status === 'pending').length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Existing Banners */}
-        <Card className="border-border/50 bg-card/80">
-          <CardHeader>
-            <CardTitle className="text-foreground">Banners Cadastrados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {banners.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">Nenhum banner cadastrado ainda.</p>
-            ) : (
-              <div className="space-y-4">
-                {banners.map(banner => {
-                  const stat = stats[banner.id];
-                  return (
-                    <div
-                      key={banner.id}
-                      className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border border-border/50 bg-background/50"
-                    >
-                      <img
-                        src={banner.image_url}
-                        alt={banner.title || 'Banner'}
-                        className="w-24 h-14 object-cover rounded-md flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground text-sm truncate">
-                          {banner.title || '(sem título)'}
-                        </p>
+          <TabsContent value="banners" className="space-y-8">
+            {/* Add New Banner */}
+            <Card className="border-border/50 bg-card/80">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Plus className="w-5 h-5" /> Novo Banner
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Posição (slot)</Label>
+                    <Select value={newSlot} onValueChange={setNewSlot}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SLOT_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Título (opcional)</Label>
+                    <Input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Ex: Promoção Pet Shop" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Link de destino (opcional)</Label>
+                  <Input value={newLink} onChange={e => setNewLink(e.target.value)} placeholder="https://exemplo.com" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Imagem do Banner</Label>
+                  <Input
+                    id="banner-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={e => setNewFile(e.target.files?.[0] || null)}
+                  />
+                </div>
+                <Button onClick={handleUpload} disabled={uploading || !newFile}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploading ? 'Enviando...' : 'Adicionar Banner'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Existing Banners */}
+            <Card className="border-border/50 bg-card/80">
+              <CardHeader>
+                <CardTitle className="text-foreground">Banners Cadastrados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {banners.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">Nenhum banner cadastrado ainda.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {banners.map(banner => {
+                      const stat = stats[banner.id];
+                      return (
+                        <div
+                          key={banner.id}
+                          className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border border-border/50 bg-background/50"
+                        >
+                          <img
+                            src={banner.image_url}
+                            alt={banner.title || 'Banner'}
+                            className="w-24 h-14 object-cover rounded-md flex-shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground text-sm truncate">
+                              {banner.title || '(sem título)'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {SLOT_OPTIONS.find(s => s.value === banner.slot)?.label || banner.slot}
+                            </p>
+                            {banner.link_url && (
+                              <a href={banner.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 mt-0.5">
+                                <ExternalLink className="w-3 h-3" /> Link
+                              </a>
+                            )}
+                            <div className="flex items-center gap-3 mt-2">
+                              <Badge variant="secondary" className="text-xs gap-1 font-normal">
+                                <Eye className="w-3 h-3" />
+                                {stat?.impressions ?? 0}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs gap-1 font-normal">
+                                <MousePointerClick className="w-3 h-3" />
+                                {stat?.clicks ?? 0}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs gap-1 font-normal">
+                                <BarChart3 className="w-3 h-3" />
+                                CTR {stat?.ctr ?? 0}%
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">{banner.is_active ? 'Ativo' : 'Inativo'}</span>
+                              <Switch checked={banner.is_active} onCheckedChange={() => toggleActive(banner)} />
+                            </div>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteBanner(banner)}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-4">
+            <Card className="border-border/50 bg-card/80">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <AlertTriangle className="w-5 h-5 text-destructive" /> Denúncias
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {reports.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">Nenhuma denúncia recebida.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {reports.map(report => (
+                      <div
+                        key={report.id}
+                        className="p-4 rounded-lg border border-border/50 bg-background/50 space-y-3"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <Badge variant={
+                              report.status === 'pending' ? 'destructive' : 
+                              report.status === 'blocked' ? 'default' : 'secondary'
+                            }>
+                              {report.status === 'pending' ? 'Pendente' : 
+                               report.status === 'blocked' ? 'Bloqueado' : 'Resolvido'}
+                            </Badge>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(report.created_at).toLocaleDateString('pt-BR', { 
+                                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Motivo:</p>
+                          <p className="text-sm text-muted-foreground">{report.reason}</p>
+                        </div>
                         <p className="text-xs text-muted-foreground">
-                          {SLOT_OPTIONS.find(s => s.value === banner.slot)?.label || banner.slot}
+                          ID denunciado: {report.reported_user_id.slice(0, 8)}...
                         </p>
-                        {banner.link_url && (
-                          <a href={banner.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 mt-0.5">
-                            <ExternalLink className="w-3 h-3" /> Link
-                          </a>
+
+                        {report.status === 'pending' && (
+                          <div className="space-y-2 pt-2 border-t border-border/50">
+                            <Textarea
+                              placeholder="Notas do admin (opcional)"
+                              value={adminNotes[report.id] || ''}
+                              onChange={(e) => setAdminNotes(prev => ({ ...prev, [report.id]: e.target.value }))}
+                              rows={2}
+                            />
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleResolveReport(report.id, 'resolved')}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Resolver
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleResolveReport(report.id, 'blocked')}
+                              >
+                                <Ban className="w-4 h-4 mr-1" />
+                                Bloquear Conta
+                              </Button>
+                            </div>
+                          </div>
                         )}
-                        {/* Metrics */}
-                        <div className="flex items-center gap-3 mt-2">
-                          <Badge variant="secondary" className="text-xs gap-1 font-normal">
-                            <Eye className="w-3 h-3" />
-                            {stat?.impressions ?? 0}
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs gap-1 font-normal">
-                            <MousePointerClick className="w-3 h-3" />
-                            {stat?.clicks ?? 0}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs gap-1 font-normal">
-                            <BarChart3 className="w-3 h-3" />
-                            CTR {stat?.ctr ?? 0}%
-                          </Badge>
-                        </div>
+
+                        {report.admin_notes && (
+                          <p className="text-xs text-muted-foreground italic border-t border-border/50 pt-2">
+                            Notas: {report.admin_notes}
+                          </p>
+                        )}
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">{banner.is_active ? 'Ativo' : 'Inativo'}</span>
-                          <Switch checked={banner.is_active} onCheckedChange={() => toggleActive(banner)} />
-                        </div>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteBanner(banner)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
