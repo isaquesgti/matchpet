@@ -146,7 +146,7 @@ const ComoFunciona = () => {
                 icon={Handshake}
                 title="Combine os Detalhes e Encontre"
                 description="Alinhe local do encontro, exames necessários, vacinas e expectativas sobre a ninhada. Recomendamos formalizar um acordo simples por escrito e marcar o primeiro encontro dos pets em local público, como um parque ou clínica veterinária."
-                tip="Disponibilizamos um modelo de acordo entre tutores para download gratuito."
+                tip=""
               />
             </div>
           </section>
@@ -223,14 +223,6 @@ const ComoFunciona = () => {
               label="Acordo escrito entre os tutores"
               sublabel="Simples, mas importante para proteger ambas as partes."
             />
-
-            <a
-              href="#"
-              className="mt-5 w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/15 text-primary font-semibold text-sm py-3 px-4 rounded-xl border border-primary/20 transition-colors"
-            >
-              <Syringe className="w-4 h-4" />
-              Baixar modelo de acordo entre tutores
-            </a>
           </section>
 
           {/* Seção: Dicas de Segurança */}
