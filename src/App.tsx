@@ -20,7 +20,7 @@ import TermsPage from "./components/Terms";
 import Privacy from "./components/Privacy"; 
 import SecurityPage from "./components/Seguranca"; 
 import FAQItem from "./components/Faq";
-import StepCard from "./components/Comofunciona";
+import ComoFunciona from "./components/Comofunciona";
 
 
 const queryClient = new QueryClient();
@@ -67,7 +67,7 @@ const App = () => (
             <Route path="/privacidade" element={<Privacy />} />
             <Route path="/faq" element={<FAQItem />} />
             <Route path="/seguranca" element={<SecurityPage />} />
-            <Route path="/comofunciona" element={<StepCard />} />
+            <Route path="/comofunciona" element={<ComoFunciona />} />
             
             {/* Rota 404 - Sempre por último */}
             <Route path="*" element={<NotFound />} />
