@@ -146,7 +146,7 @@ const ComoFunciona = () => {
                 icon={Handshake}
                 title="Combine os Detalhes e Encontre"
                 description="Alinhe local do encontro, exames necessários, vacinas e expectativas sobre a ninhada. Recomendamos formalizar um acordo simples por escrito e marcar o primeiro encontro dos pets em local público, como um parque ou clínica veterinária."
-                tip=""
+                tip="Crie um acordo simples e registre em cartório"
               />
             </div>
           </section>
