@@ -219,15 +219,13 @@ export default function Auth() {
                   />
                  <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
                     Li e aceito os{' '}
-                      <Link to="/termos" target="_blank" onClick={(e) => e.stopPropagation()} // Adicione isso aqui
-                        className="text-primary hover:underline font-medium">
-                    Termos de Uso
-                      </Link>{' '}
-                      e a{' '}
-                      <Link to="/privacidade" target="_blank" onClick={(e) => e.stopPropagation()} // E aqui também
-                       className="text-primary hover:underline font-medium">
+                    <Link to="/termos" target="_blank" className="text-primary hover:underline font-medium">
+                      Termos de Uso
+                    </Link>{' '}
+                    e a{' '}
+                    <Link to="/privacidade" target="_blank" className="text-primary hover:underline font-medium">
                       Política de Privacidade
-                        </Link>
+                    </Link>
                   </label>
                 </div>
               </>
